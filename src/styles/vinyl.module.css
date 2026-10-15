@@ -1,0 +1,47 @@
+/* --d is the record's diameter. The square stage is 1.25 × that so lean and
+   shadow never clip. The record centre sits 0.2·d inside the top-right corner,
+   which leaves roughly 45 % of the disc beyond the viewport. */
+.stage {
+  --d: min(108vh, 61vw);
+  --inset: .19;
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--d) * (var(--inset) - .625));
+  right: calc(var(--d) * (var(--inset) - .625));
+  width: calc(var(--d) * 1.25);
+  aspect-ratio: 1;
+}
+.stage[data-hover] { cursor: pointer; }
+
+.canvas, .fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+.canvas { display: block; opacity: 0; transition: opacity .6s ease; }
+.fallback { transition: opacity .6s ease; }
+.stage[data-status="ready"] .canvas { opacity: 1; }
+.stage[data-status="ready"] .fallback { opacity: 0; }
+
+.fallbackDisc { display: block; width: 100%; height: 100%; }
+.fallbackSpin { transform-origin: 125px 125px; animation: spin 20s linear infinite; }
+.stage[data-playing] .fallbackSpin { animation-duration: 1.8s; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .stage { --d: min(80vh, 64vw); --inset: .14; }
+}
+/* Portrait tablet: tall screen, so the record grows and crowns the top. */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  .stage { --d: min(92vw, 62vh); --inset: .2; }
+}
+
+@media (max-width: 767px) {
+  .stage {
+    /* Centre at (62vw, 20vw): the label stays fully visible, the rim runs off the top and right. */
+    --d: 104vw;
+    top: calc(20vw - var(--d) * .625);
+    right: calc(38vw - var(--d) * .625);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fallbackSpin { animation: none; }
+  .canvas, .fallback { transition: none; }
+}

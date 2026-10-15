@@ -1,0 +1,227 @@
+/* Vinyl-native audio control. Only brand colours: #242424, #6A7077, #564EF0. */
+
+.card {
+  --disc: 72px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 30px;
+  padding: 14px 14px 12px 14px;
+  border: 1px solid #e4e1d6;
+  border-radius: 16px;
+  background: rgb(255 255 255 / .72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 2px rgb(16 24 40 / .03), 0 8px 20px -14px rgb(16 24 40 / .14);
+}
+
+/* ── Mini record (the play/pause button) ── */
+.disc {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  position: relative;
+  flex: none;
+  width: var(--disc);
+  height: var(--disc);
+  border-radius: 50%;
+  perspective: 240px;
+  -webkit-tap-highlight-color: transparent;
+}
+.disc:disabled { cursor: not-allowed; opacity: .55; }
+.disc:focus-visible { outline: 3px solid var(--color-text-primary); outline-offset: 4px; }
+
+.discShadow {
+  position: absolute;
+  inset: 6% 4% 0 8%;
+  border-radius: 50%;
+  background: rgb(36 36 36 / .32);
+  filter: blur(6px);
+  transform: translate(1px, 3px);
+  transition: transform .35s var(--ease), opacity .35s ease, filter .35s ease;
+  opacity: .7;
+}
+.discBody {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform .45s var(--ease);
+  box-shadow: inset 0 0 0 .5px rgb(255 255 255 / .06);
+}
+.discSpin { position: absolute; inset: 0; display: block; will-change: transform; }
+.discSpin svg { display: block; }
+
+/* Fixed studio light: two soft wedges across the grooves, kept off the label. */
+.discSheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    conic-gradient(from 300deg, transparent 0deg, rgb(255 255 255 / .2) 16deg, transparent 34deg,
+      transparent 180deg, rgb(255 255 255 / .1) 196deg, transparent 214deg),
+    radial-gradient(120% 120% at 28% 18%, rgb(255 255 255 / .08), transparent 45%);
+  -webkit-mask: radial-gradient(circle, transparent 0 35%, #000 36.5% 98%, transparent 99%);
+  mask: radial-gradient(circle, transparent 0 35%, #000 36.5% 98%, transparent 99%);
+}
+
+.discIcon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  pointer-events: none;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform .45s var(--ease);
+}
+.discIcon svg { transform: translateX(.5px); }
+.disc[data-playing] .discIcon svg { transform: none; }
+
+/* Minimal needle: rests just off the record, swings onto the grooves while playing. */
+.arm {
+  position: absolute;
+  top: -3px;
+  right: -7px;
+  width: 2px;
+  height: 46%;
+  border-radius: 2px;
+  background: linear-gradient(#6A7077, #3a3d41);
+  transform-origin: 50% 2px;
+  transform: rotate(8deg);
+  transition: transform .9s var(--ease);
+  pointer-events: none;
+}
+.arm::before { /* pivot */
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f7f6f2;
+  box-shadow: inset 0 0 0 1.5px #6A7077;
+  transform: translateX(-50%);
+}
+.arm::after { /* stylus head */
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 5px;
+  height: 7px;
+  border-radius: 1.5px;
+  background: #242424;
+  transform: translateX(-50%);
+}
+.disc[data-playing] .arm { transform: rotate(28deg); }
+
+@media (hover: hover) and (pointer: fine) {
+  .disc:hover:not(:disabled) .discShadow { opacity: 1; transform: translate(2px, 5px); filter: blur(7px); }
+}
+
+/* ── Track info ── */
+.info { flex: 1; min-width: 0; }
+.track {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  color: var(--color-text-primary);
+}
+.artist { margin-top: 1px; font-size: 13px; line-height: 1.35; color: var(--color-text-secondary); }
+
+/* ── Groove line: time · thin seek · time · mute ── */
+.groove { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.seek {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 24px; /* generous hit area; the visible line is 1.5px */
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.seek:disabled { cursor: default; }
+.seek:focus-visible { outline: 2px solid var(--color-text-primary); outline-offset: 2px; border-radius: 4px; }
+.seek::-webkit-slider-runnable-track {
+  height: 1.5px;
+  background: linear-gradient(to right, var(--color-text-primary) var(--pct, 0%), #d6d3c9 var(--pct, 0%));
+}
+.seek::-moz-range-track { height: 1.5px; background: #d6d3c9; }
+.seek::-moz-range-progress { height: 1.5px; background: var(--color-text-primary); }
+.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  margin-top: -3.25px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  transition: transform .2s ease;
+}
+.seek::-moz-range-thumb { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--color-text-primary); }
+.seek:hover:not(:disabled)::-webkit-slider-thumb, .seek:focus-visible::-webkit-slider-thumb { transform: scale(1.35); }
+.seek:disabled::-webkit-slider-thumb { background: #c9c6bc; }
+.seek:disabled::-moz-range-thumb { background: #c9c6bc; }
+
+.mute {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-right: -4px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  transition: color .2s ease, background-color .2s ease;
+}
+.mute::before { content: ""; position: absolute; inset: -9px; } /* 44px touch target */
+.mute:hover:not(:disabled) { color: var(--color-text-primary); background: rgb(36 36 36 / .05); }
+.mute[aria-pressed="true"] { color: var(--color-text-primary); }
+.mute:disabled { opacity: .4; cursor: not-allowed; }
+.mute:focus-visible { outline-offset: 2px; }
+/* Tooltip */
+.mute::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-text-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 3px);
+  transition: opacity .15s ease, transform .15s ease;
+  pointer-events: none;
+}
+.mute:hover:not(:disabled)::after, .mute:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 767px) {
+  .card { --disc: 60px; max-width: none; margin-top: 22px; gap: 22px; padding: 12px 12px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discBody, .discIcon { transform: none; transition: none; }
+  .discShadow, .arm, .seek::-webkit-slider-thumb { transition: none; }
+}

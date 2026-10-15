@@ -1,0 +1,124 @@
+/* Full-viewport 404 composition: copy on the left, oversized record off the top-right. */
+
+.page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  /* clip, not hidden: a hidden container can still be scrolled sideways by focus/scrollIntoView. */
+  overflow: hidden;
+  overflow: clip;
+  /* JazzHQ graph-paper grid: warm off-white base, thin low-contrast lines. */
+  background-color: var(--background);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: -1px -1px;
+}
+/* Faint purple wash where the record sits, like the homepage hero. */
+.page::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(48% 62% at 88% 14%, color-mix(in srgb, var(--color-vendor) 7%, transparent), transparent 72%);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  max-width: calc(600px + var(--page-padding) * 2);
+  padding: 104px var(--page-padding) 64px;
+  pointer-events: none; /* let clicks through to the record; re-enabled on real controls */
+}
+.content a, .content button, .content input, .message { pointer-events: auto; }
+
+.logo { position: absolute; top: 34px; left: var(--page-padding); display: inline-flex; border-radius: 4px; }
+.logo img { display: block; width: 120px; height: auto; }
+
+.message { max-width: 540px; }
+
+
+.heading { font-family: var(--font-display); color: var(--color-text-primary); }
+.code {
+  display: block;
+  font-size: clamp(84px, min(11vw, 18vh), 168px);
+  font-weight: 800;
+  line-height: .9;
+  letter-spacing: -.055em;
+  margin-left: -.04em;
+}
+.title {
+  display: block;
+  max-width: 520px;
+  margin-top: 20px;
+  font-size: clamp(28px, 2.7vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.022em;
+}
+.support {
+  max-width: 470px;
+  margin-top: 16px;
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: -.01em;
+  color: var(--color-text-secondary);
+}
+
+/* Outline CTA: same behaviour as the homepage .dh-outline-cta. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 12px 24px;
+  border: 2px solid var(--color-text-primary);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  transition: background-color .2s ease, color .2s ease;
+}
+.cta span { transition: transform .25s var(--ease); }
+.cta:hover, .cta:focus-visible { background: var(--color-text-primary); color: #fff; }
+.cta:hover span { transform: translateX(3px); }
+
+/* Tablet: same two-part idea, smaller record, narrower copy. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .content { max-width: calc(440px + var(--page-padding) * 2); }
+  .title { font-size: 30px; }
+  .support { font-size: 17px; }
+}
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  .content { justify-content: flex-end; padding-bottom: max(64px, 11vh); }
+  .code { font-size: 144px; }
+  .title { font-size: 34px; }
+}
+
+/* Mobile: record crowns the top of the screen, copy stacks beneath it. */
+@media (max-width: 767px) {
+  .content {
+    justify-content: flex-start;
+    min-height: 0;
+    max-width: none;
+    padding: calc(72vw + 10px) var(--page-padding) 32px;
+  }
+  .logo { position: static; margin-bottom: 18px; align-self: flex-start; }
+  .logo img { width: 104px; }
+  .code { font-size: clamp(72px, 21vw, 104px); }
+  .title { margin-top: 12px; font-size: clamp(24px, 6.8vw, 30px); }
+  .support { margin-top: 12px; font-size: 16px; }
+  .cta { width: 100%; justify-content: center; padding-block: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta, .cta span { transition: none; }
+}
