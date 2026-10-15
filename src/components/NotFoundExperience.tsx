@@ -5,7 +5,7 @@ import { ErrorContent } from "./ErrorContent";
 import { VinylScene } from "./VinylScene";
 import styles from "@/styles/experience.module.css";
 
-export const SORRY_AUDIO_SRC = "/audio/sorry.mp3";
+export const SORRY_AUDIO_SRC = "/audio/sorry-v2.mp3";
 
 export function NotFoundExperience() {
   const audio = useAudio(SORRY_AUDIO_SRC);
